@@ -1,0 +1,15 @@
+.title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 20px 0;
+    font-size: 20px;
+    background-color: #FFF;
+    padding: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.title svg {
+    margin-right: 10px;
+}

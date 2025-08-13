@@ -1,0 +1,31 @@
+form .status {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+form .status input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+form .status span {
+    white-space: nowrap;
+    margin-right: 30px;
+    margin-left: 5px;
+}
+
+form textarea {
+    resize: none;
+    height: 105px;
+} 
+
+
+
+
