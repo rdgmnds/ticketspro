@@ -28,7 +28,7 @@ function Modal({ content, close }){
 
                     <div className='row'>
                         <span>
-                            Status: <i className='badge-status' style={{ backgroundColor: content.status === 'Aberto' ? 'brown' : content.status === 'Progresso' ? '#0022bbff' : '#1b8800ff' }}>
+                            Status: <i className='badge-status' style={{ backgroundColor: content.status === 'Aberto' ? 'brown' : content.status === 'Cancelado' ? '#999' : content.status === 'Progresso' ? '#0022bbff' : '#1b8800ff' }}>
                                         {content.status}
                                     </i>
                             Cadastrado em: <i>{content.createdFormat}</i>

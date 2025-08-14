@@ -3,9 +3,9 @@ import { FiMessageSquare, FiPlus, FiSearch, FiEdit2 } from 'react-icons/fi';
 import Sidebar from "../../components/Sidebar";
 import Title from '../../components/Title';
 import { useEffect, useState } from "react";
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { db } from '../../services/firebaseConnection';
-import { collection, getDocs, limit, startAfter, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, limit, startAfter, orderBy, query, where } from 'firebase/firestore';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
 
@@ -16,8 +16,10 @@ function Dashboard(){
     const [ isEmpty, setIsEmpty ] = useState(false); // não tem chamados na coleção do firebase
     const [ lastDocs, setLastDocs ] = useState(); // armazena o último chamado no firebase para usar no botão 'buscar mais'
     const [ loadingMore, setLoadingMore ] = useState(false); // clicou no botão 'buscar mais'
+    const [ statusFilter, setStatusFilter ] = useState("Todos");
     const [ viewModal, setViewModal ] = useState(false); // manipular o modal de detalhes
     const [ detail, setDetail ] = useState(); // receberá os dados do chamado ao clicar no modal de detalhes
+    const [ isFilter, setIsFilter ] = useState(false); // verifica se houve filtragem nos tickets
 
     const listRef = collection(db, "tickets"); // coleção dos chamados no firebase
 
@@ -26,9 +28,9 @@ function Dashboard(){
     useEffect(() => {
         async function loadTickets(){
             const q = query(listRef, orderBy('created', 'desc'), limit(10));
-
             const querySnapshot = await getDocs(q);
-            await updateState(querySnapshot);
+            
+            await updateStateTickets(querySnapshot);
 
             setLoading(false);
         }
@@ -40,7 +42,7 @@ function Dashboard(){
 
 
     // ADICIONA OS CHAMADOS DO FIREBASE NA STATE DOS TICKETS
-    async function updateState(querySnapshot){
+    async function updateStateTickets(querySnapshot){
         const isCollectionEmpty = querySnapshot.size === 0;
 
         if (!isCollectionEmpty){
@@ -76,7 +78,7 @@ function Dashboard(){
 
         const q = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(10));
         const querySnapshot = await getDocs(q);
-        await updateState(querySnapshot);
+        await updateStateTickets(querySnapshot);
     }
 
 
@@ -87,7 +89,28 @@ function Dashboard(){
     }
 
 
-    // MOSTRA NA TELA QUE OS CHAMADOS ESTÃO SENDO CARREGADOS
+    // BUSCA E MOSTRA APENAS OS CHAMADOS FILTRADOS
+    async function handleFilter(e){
+        const value = e.target.value;
+        setStatusFilter(value);
+        setIsFilter(true);
+        setTickets([]);
+
+        let q;
+
+        if (value === "Todos") {
+            q = query(listRef, orderBy('created', 'desc'), limit(10));
+        } else {
+            q = query(listRef, where("status", "==", value), orderBy('created', 'desc'), limit(10));
+        }
+
+        const querySnapshot = await getDocs(q);
+        await updateStateTickets(querySnapshot);
+        setLoading(false);
+    }
+
+
+    // AVISA QUE OS CHAMADOS ESTÃO SENDO CARREGADOS
     if (loading){
         return(
             <div>
@@ -114,20 +137,30 @@ function Dashboard(){
                 </Title>
 
                 <>
-                    { tickets.length === 0 ? (
+                    { tickets.length === 0 && isFilter === false ? (
                         <div className='container dashboard'>
                             <span>Nenhum chamado encontrado...</span>
                             <Link className='new' to={"/new"}>
                                 <FiPlus color='#FFF' size={20}/>
                                 Novo chamado
                             </Link>  
-                        </div>     
-                    ) : (
+                        </div>) : (
                         <> 
                         <Link className='new' to={"/new"}>
                             <FiPlus color='#FFF' size={20}/>
                             Novo chamado
                         </Link>
+                        
+                        <div className='filtro'>
+                            <label>Status</label>
+                            <select name='Filter' value={statusFilter} onChange={handleFilter}>
+                                <option value={"Todos"}>Todos</option>
+                                <option value={"Aberto"}>Em aberto</option>
+                                <option value={"Progresso"}>Em progresso</option>
+                                <option value={"Atendido"}>Atendido</option>
+                                <option value={"Cancelado"}>Cancelado</option>
+                            </select>
+                        </div>
 
                         <table>
                             <thead>
@@ -146,7 +179,7 @@ function Dashboard(){
                                             <td data-label="Cliente">{item.cliente}</td>
                                             <td data-label="Assunto">{item.assunto}</td>
                                             <td data-label="Status">
-                                                <span className='badge' style={{ backgroundColor: item.status === 'Aberto' ? 'brown' : item.status === 'Progresso' ? '#0022bbff' : '#1b8800ff' }}>
+                                                <span className='badge' style={{ backgroundColor: item.status === 'Aberto' ? 'brown' : item.status === 'Progresso' ? '#0022bbff' : item.status === 'Cancelado' ? '#999' : '#1b8800ff' }}>
                                                     {item.status}
                                                 </span>
                                             </td>
@@ -168,7 +201,7 @@ function Dashboard(){
                         { loadingMore && <h3 className='label-more'>Buscando mais chamados...</h3> } 
                         {!loadingMore && !isEmpty && <button className='btn-more' onClick={handleMore}>Buscar mais</button>}
                         </>
-                    ) }
+                    )}
                 </>
             </div>
 

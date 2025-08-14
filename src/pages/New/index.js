@@ -3,7 +3,7 @@ import { FiEdit2, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import Title from '../../components/Title';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../../services/firebaseConnection';
 import { collection, getDocs, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -21,10 +21,12 @@ function New(){
     const [ status, setStatus ] = useState("Aberto");
     const [ loadCustomers, setLoadCustomers ] = useState(true); // verifica se ainda está carregando os clientes
     const [ customerSelected, setCustomerSelected ] = useState(0); // guarda o cliente selecionado 
-    const [ isTicketEdit, setIsTicketEdit ] = useState(false);
+    const [ isTicketEdit, setIsTicketEdit ] = useState(false); // verifica se é edição de chamado
 
     const listRef = collection(db, "customers");
     const navigate = useNavigate();
+
+    const customerRef = useRef(null);
 
 
     // BUSCA OS CLIENTES NO FIREBASE
@@ -233,6 +235,21 @@ function New(){
                                 checked={status === "Atendido"}
                             />
                             <span>Atendido</span>
+
+                           {isTicketEdit && (
+                                <input
+                                    type='radio'
+                                    name='radio'
+                                    value="Cancelado"
+                                    onChange={handleOptionChange}
+                                    checked={status === "Cancelado"}
+                                />
+                            )}
+                            {isTicketEdit && (
+                                <span>Cancelado</span>
+                            )}
+                                
+                            
                         </div>
                         
                         <label>Complemento</label>

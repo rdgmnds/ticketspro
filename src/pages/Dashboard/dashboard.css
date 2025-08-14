@@ -93,6 +93,26 @@ table td .badge {
     border: 0;
     background-color: #181c2e;
     color: #FFF;
+    transition: ease-in-out 0.3s;
+}
+
+.btn-more:hover {
+    background-color: #0e1f63;
+}
+
+.filtro {
+    display: flex;
+    flex-direction: column;
+}
+
+.filtro label {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.filtro select {
+    width: 200px;
 }
 
 @media screen and (max-width: 600px){
