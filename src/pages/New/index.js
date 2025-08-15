@@ -3,7 +3,7 @@ import { FiEdit2, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import Title from '../../components/Title';
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../../services/firebaseConnection';
 import { collection, getDocs, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -22,11 +22,10 @@ function New(){
     const [ loadCustomers, setLoadCustomers ] = useState(true); // verifica se ainda está carregando os clientes
     const [ customerSelected, setCustomerSelected ] = useState(0); // guarda o cliente selecionado 
     const [ isTicketEdit, setIsTicketEdit ] = useState(false); // verifica se é edição de chamado
+    const [ loadingPage, setLoadingPage ] = useState(true); // verifica se a página ainda está carregando
 
     const listRef = collection(db, "customers");
     const navigate = useNavigate();
-
-    const customerRef = useRef(null);
 
 
     // BUSCA OS CLIENTES NO FIREBASE
@@ -61,6 +60,9 @@ function New(){
                 toast.error("Erro ao buscar clientes: " + error)
                 setLoadCustomers(false);
             })
+
+            setLoadingPage(false);
+
         }
 
         loadCustomers()
@@ -199,7 +201,7 @@ function New(){
                         }
 
                         <label>Assunto</label>
-                        <select name='Assunto' value={subject} onChange={handleSelectChange}>
+                        <select name='Assunto' value={subject} onChange={handleSelectChange} disabled={loadingPage}>
                             <option value={"Suporte"}>Suporte técnico</option>
                             <option value={"Financeiro"}>Financeiro</option>
                             <option value={"Comercial"}>Comercial</option>
@@ -215,6 +217,7 @@ function New(){
                                 value="Aberto"
                                 onChange={handleOptionChange}
                                 checked={status === "Aberto"}
+                                disabled={loadingPage}
                             />
                             <span>Em aberto</span>
 
@@ -224,6 +227,7 @@ function New(){
                                 value="Progresso"
                                 onChange={handleOptionChange}
                                 checked={status === "Progresso"}
+                                disabled={loadingPage}
                             />
                             <span>Em progresso</span>
 
@@ -233,6 +237,7 @@ function New(){
                                 value="Atendido"
                                 onChange={handleOptionChange}
                                 checked={status === "Atendido"}
+                                disabled={loadingPage}
                             />
                             <span>Atendido</span>
 
@@ -243,6 +248,7 @@ function New(){
                                     value="Cancelado"
                                     onChange={handleOptionChange}
                                     checked={status === "Cancelado"}
+                                    disabled={loadingPage}
                                 />
                             )}
                             {isTicketEdit && (
@@ -258,9 +264,10 @@ function New(){
                             placeholder='Adicione um complemento (opcional).'
                             value={complement}
                             onChange={ (e) => setComplement(e.target.value) }
+                            disabled={loadingPage}
                         />
 
-                        <button type='submit'>
+                        <button type='submit' disabled={loadingPage}>
                             { loadingBtn && id ? "Editando chamado..." : loadingBtn && !id ? "Criando chamado" : !loadingBtn && !id ? "Criar chamado" : "Editar chamado" }
                         </button>
 
